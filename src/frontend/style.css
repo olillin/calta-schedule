@@ -59,15 +59,22 @@ h3 {
     border-radius: var(--border-radius);
 }
 
+.select-name {
+    display: grid;
+    grid-template-columns: minmax(min-content, max-content) 1fr;
+    gap: 0.5em;
+    align-items: center;
+}
+
 label {
     color: var(--primaryForeground);
 }
 
 select {
-    width: 50%;
-    min-width: fit-content;
+    max-width: 20em;
+    min-width: 0;
+    box-sizing: border-box;
     
-    margin-inline: 1em;
     padding: 0.5em 1em;
 
     color: var(--primaryForeground);
@@ -110,6 +117,7 @@ option {
     padding: 0;
     margin: 0;
     color: inherit;
+    min-width: 0;
 }
 
 .copy-calendar-url {
