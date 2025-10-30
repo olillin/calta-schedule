@@ -2,10 +2,12 @@ import express from 'express'
 import fs from 'fs'
 import http from 'http'
 import https from 'https'
+import { createCalendar, findPeople, loadCsvFromUrl } from './convert'
 
 // Environment variables
 interface EnvironmentVariables {
-    PORT?: Number
+    PORT?: number
+    CSV_URL?: string | null
 }
 
 // Remove 'optional' attributes from a type's properties
@@ -15,10 +17,16 @@ type Concrete<Type> = {
 
 const DEFAULT_ENVIRONMENT: Concrete<EnvironmentVariables> = {
     PORT: 8080,
+    CSV_URL: null,
 }
 
 const ENVIRONMENT: Concrete<EnvironmentVariables> = Object.assign(Object.assign({}, DEFAULT_ENVIRONMENT), process.env as EnvironmentVariables)
-const { PORT } = ENVIRONMENT
+const { PORT, CSV_URL } = ENVIRONMENT
+
+if (!CSV_URL) {
+    console.error('Missing required environment CSV_URL')
+    process.exit()
+}
 
 // Paths
 const PUBLIC_DIRECTORY = 'public'
@@ -31,6 +39,25 @@ if (fs.existsSync(PUBLIC_DIRECTORY)) {
 } else {
     console.warn('WARNING: No public directory')
 }
+
+app.get('/calendar', (req, res) => {
+    loadCsvFromUrl(CSV_URL).then(csv => {
+
+        const ta = String(req.query.ta ?? '')
+    const calendar = createCalendar(csv, ta)
+
+    res.setHeader('Content-Type', 'text/calendar')
+        .setHeader('Content-Disposition', `attachment; filename="${ta}.ics"`)
+        .end(calendar.serialize())
+    })
+})
+
+app.get('/people', (req, res) => {
+    loadCsvFromUrl(CSV_URL).then(csv => {
+        const people = [...findPeople(csv)].sort()
+        res.json({people: people})
+    })
+})
 
 // Start server
 var server

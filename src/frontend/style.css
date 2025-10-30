@@ -1,0 +1,178 @@
+:root {
+    --primaryBackground: #111111;
+    --secondaryBackground: #1e1e1e;
+    --accentBackground: #0a0a0a;
+
+    --primaryForeground: #fefefe;
+    --secondaryForeground: #aaaaaa;
+
+    --error: #ff4c4c;
+
+    --border-radius: 1.25em;
+}
+
+body {
+    width: 100vw;
+    background-color: var(--primaryBackground);
+    color: var(--secondaryForeground);
+    font-family: sans-serif;
+    overflow-x: hidden;
+}
+
+main {
+    margin-block: 8em;
+}
+
+@media screen and (min-width: 800px) {
+    main {
+        width: 700px;
+        margin-inline: auto;
+    }
+}
+
+@media screen and (max-width: 800px) {
+    main {
+        width: auto;
+        margin-inline: 2em;
+    }
+}
+
+h1 {
+    font-size: 2.5em;
+    color: var(--primaryForeground);
+}
+
+h2 {
+    font-size: 1.75em;
+    color: var(--primaryForeground);
+}
+
+h3 {
+    font-size: 1.25em;
+}
+
+.builder {
+    margin-block: 2em;
+    padding: 2em;
+
+    background: var(--secondaryBackground);
+    border-radius: var(--border-radius);
+}
+
+label {
+    color: var(--primaryForeground);
+}
+
+select {
+    width: 50%;
+    min-width: fit-content;
+    
+    margin-inline: 1em;
+    padding: 0.5em 1em;
+
+    color: var(--primaryForeground);
+    background: var(--primaryBackground);
+    border: 0.1em solid var(--secondaryForeground);
+    border-radius: var(--border-radius);
+
+    outline: none;
+}
+
+select:focus:not(:open) {
+    outline: 0.1em solid var(--primaryForeground);
+    border-color: var(--primaryForeground);
+}
+
+option {
+    color: var(--primaryForeground);
+    background: var(--primaryBackground);
+}
+
+/* Calendar URL */
+.calendar-url {
+    color: var(--primaryForeground) !important;
+    display: grid;
+    grid-template-columns: 1fr max-content 2em;
+    grid-template-rows: 1fr;
+    align-items: center;
+    margin-top: 1.5em;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1em 1.5em;
+    border-radius: var(--border-radius);
+    background: var(--accentBackground);
+    color: var(--foreground);
+}
+
+.calendar-url input {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+}
+
+.copy-calendar-url {
+    height: 2em;
+    width: 2em;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    border: none;
+    cursor: pointer;
+    background-color: transparent;
+    background-image: url('/copy.png');
+    background-position: center;
+    background-size: contain;
+    
+}
+
+.copy-calendar-url:focus {
+    outline: 0.2em solid var(--primaryForeground);
+    outline-offset: 0.25em;
+}
+
+.copy-notice {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    width: fit-content;
+    overflow: hidden;
+    position: relative;
+}
+
+.copy-notice span {
+    position: relative;
+    right: -100%;
+    width: fit-content;
+    white-space: nowrap;
+    text-align: right;
+    padding-right: 0.5em;
+    transition: right 0.5s ease;
+}
+
+.copy-notice.visible span {
+    right: 0;
+}
+
+.no-select {
+    user-select: none;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+}
+
+.error {
+    color: var(--error);
+}
+
+summary {
+    font-weight: bold;
+}
+
+details {
+    margin: 1em 0 2.5em 1em;
+}
+
+a {
+    color: var(--selected-color);
+}

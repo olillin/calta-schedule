@@ -5,11 +5,30 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Express TypeScript Template</title>
+    <title>Subscribe to TA schedule</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
 
 <body>
-    <h1 id="foo">Foo</h1>
+    <main>
+        <h1>Subscribe to your TA schedule for Advanced Python</h1>
+        <p>
+            Select your name from the list and copy the URL below! The URL can
+            then be pasted into your calendar app of choice. Let me
+            (Oliver Lindell) know if you have any problems!
+        </p>
+
+        <div class="builder">
+            <div class="select-name">
+                <label for="ta">Your name</label>
+                <select id="ta" name="ta" autofocus>
+                    <option value="">Select name</option>
+                </select>
+            </div>
+
+            <div id="url"></div>
+        </div>
+    </main>
     <script src="/script.js"></script>
 </body>
 
