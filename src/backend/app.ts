@@ -8,6 +8,7 @@ import { createCalendar, findPeople, loadCsvFromUrl } from './convert'
 interface EnvironmentVariables {
     PORT?: number
     CSV_URL?: string | null
+    OFFSET_MINUTES?: string
 }
 
 // Remove 'optional' attributes from a type's properties
@@ -18,10 +19,11 @@ type Concrete<Type> = {
 const DEFAULT_ENVIRONMENT: Concrete<EnvironmentVariables> = {
     PORT: 8080,
     CSV_URL: null,
+    OFFSET_MINUTES: '0',
 }
 
 const ENVIRONMENT: Concrete<EnvironmentVariables> = Object.assign(Object.assign({}, DEFAULT_ENVIRONMENT), process.env as EnvironmentVariables)
-const { PORT, CSV_URL } = ENVIRONMENT
+const { PORT, CSV_URL, OFFSET_MINUTES } = ENVIRONMENT
 
 if (!CSV_URL) {
     console.error('Missing required environment CSV_URL')
@@ -44,7 +46,7 @@ app.get('/calendar', (req, res) => {
     loadCsvFromUrl(CSV_URL).then(csv => {
 
         const ta = String(req.query.ta ?? '')
-    const calendar = createCalendar(csv, ta)
+    const calendar = createCalendar(csv, ta, parseInt(OFFSET_MINUTES))
 
     res.setHeader('Content-Type', 'text/calendar')
         .setHeader('Content-Disposition', `attachment; filename="${ta}.ics"`)

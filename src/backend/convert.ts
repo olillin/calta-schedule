@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { readFile } from 'fs/promises'
-import { Calendar, CalendarDateTime, CalendarEvent } from 'iamcal'
+import { Calendar, CalendarDateTime, CalendarEvent, ONE_MINUTE_MS, padZeros } from 'iamcal'
 import { capitalizeWords } from './util'
 
 const kurskoder = 0
@@ -65,29 +65,29 @@ function getPeople(line: ScheduleLine): readonly string[] {
         .filter(p => p !== '')
 }
 
-export function createCalendar(csv: ScheduleData, ta: string): Calendar {
+export function createCalendar(csv: ScheduleData, ta: string, offsetMinutes: number = 0): Calendar {
     const calendar = new Calendar(
         '-//Olillin/calta-schedule//SV'
     ).setCalendarName(
         `Advanced Python TA Lab Schedule (${capitalizeWords(ta)})`
     )
 
+    const offsetMs = offsetMinutes * ONE_MINUTE_MS
+
     ta = ta.toLowerCase()
 
-    for (const line of csv) {
+    for (let i = 0; i < csv.length; i++) {
+        const line = csv[i]
+        
         const people = getPeople(line)
         if (!people.map(p => p.toLowerCase()).includes(ta)) continue
 
-        const startString = `${line[datum].replace(/-/g, '')}T${line[
-            starttid
-        ].replace(':', '')}00`
-        const start = new CalendarDateTime(startString)
-        const endString = `${line[datum].replace(/-/g, '')}T${line[
-            sluttid
-        ].replace(':', '')}00`
-        const end = new CalendarDateTime(endString)
+        const startString = line[datum] + ' ' + line[starttid]
+        const start = new Date(new Date(startString).getTime() + offsetMs)
+        const endString = line[datum] + ' ' + line[sluttid]
+        const end = new Date(new Date(endString).getTime() + offsetMs)
 
-        const event = new CalendarEvent(randomUUID(), new Date(), start)
+        const event = new CalendarEvent(`session${line}`, new Date(), start)
             .setEnd(end)
             .setSummary(`Lab Advanced Python`)
             .setDescription(
