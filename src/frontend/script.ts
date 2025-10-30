@@ -23,7 +23,7 @@ taSelect.addEventListener('change', () => {
 })
 
 function getUrl(): string {
-    const baseUrl = window.location.origin.replace(/^http\s?:\/\//, 'webcal://')
+    const baseUrl = window.location.origin
     const ta = taSelect.value.toLowerCase()
     return baseUrl + `/calendar?ta=${ta.replace(/ /g, '+')}`
 }
