@@ -1,8 +1,8 @@
 {
-  "name": "express-ts-template",
+  "name": "calta-schedule",
   "version": "1.0.0",
-  "description": "",
-  "main": "app.js",
+  "private": true,
+  "description": "Convert the schedule in Google Sheets to a calendar",
   "scripts": {
     "clean": "rimraf ./dist",
     "build": "npm run clean && npm run buildBackend && npm run buildFrontend",
