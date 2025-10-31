@@ -1,6 +1,11 @@
-import { randomUUID } from 'crypto'
 import { readFile } from 'fs/promises'
-import { Calendar, CalendarDateTime, CalendarEvent, ONE_MINUTE_MS, padZeros } from 'iamcal'
+import {
+    Calendar,
+    CalendarEvent,
+    deserializeComponentString,
+    padHours,
+} from 'iamcal'
+import { tzlib_get_ical_block } from 'timezones-ical-library'
 import { capitalizeWords } from './util'
 
 const kurskoder = 0
@@ -44,14 +49,16 @@ export async function loadCsvFromUrl(url: string): Promise<ScheduleData> {
     })
 }
 
-export function parseCsv(text: string, removeHeader: boolean = true): ScheduleData {
+export function parseCsv(
+    text: string,
+    removeHeader: boolean = true
+): ScheduleData {
     const lines = text
         .toString()
         .split(/\r?\n/)
         .map(line => line.split(/, ?/) as ScheduleLine)
-    if (removeHeader) 
-        return lines.slice(1)
-    
+    if (removeHeader) return lines.slice(1)
+
     return lines
 }
 
@@ -65,30 +72,50 @@ function getPeople(line: ScheduleLine): readonly string[] {
         .filter(p => p !== '')
 }
 
-export function createCalendar(csv: ScheduleData, ta: string, offsetMinutes: number = 0): Calendar {
+export async function createCalendar(
+    csv: ScheduleData,
+    ta: string
+): Promise<Calendar> {
     const calendar = new Calendar(
         '-//Olillin/calta-schedule//SV'
     ).setCalendarName(
         `Advanced Python TA Lab Schedule (${capitalizeWords(ta)})`
     )
-
-    const offsetMs = offsetMinutes * ONE_MINUTE_MS
+    const serializedTimezone = tzlib_get_ical_block('Europe/Stockholm')
+    const timezone = await deserializeComponentString(
+        typeof serializedTimezone === 'string'
+            ? serializedTimezone
+            : serializedTimezone[0]
+    )
+    calendar.addComponent(timezone)
 
     ta = ta.toLowerCase()
 
+    const now = new Date()
+
     for (let i = 0; i < csv.length; i++) {
         const line = csv[i]
-        
+
         const people = getPeople(line)
         if (!people.map(p => p.toLowerCase()).includes(ta)) continue
 
-        const startString = line[datum] + ' ' + line[starttid]
-        const start = new Date(new Date(startString).getTime() + offsetMs)
-        const endString = line[datum] + ' ' + line[sluttid]
-        const end = new Date(new Date(endString).getTime() + offsetMs)
+        const date = line[datum].replace(/-/g, '')
 
-        const event = new CalendarEvent(`session${line}`, new Date(), start)
-            .setEnd(end)
+        let [startHours, startMinutes] = line[starttid].split(':')
+        startHours = padHours(parseInt(startHours) - 1)
+        const start = date + 'T' + startHours + startMinutes + '00Z'
+
+        let [endHours, endMinutes] = line[sluttid].split(':')
+        endHours = padHours(parseInt(endHours) - 1)
+        const end = date + 'T' + endHours + endMinutes + '00Z'
+
+        const event = new CalendarEvent(`session${i}`, now, now)
+            .setProperty(
+                'DTSTAMP',
+                now.toISOString().replace(/([-:]|\.\d+)/g, '')
+            )
+            .setProperty('DTSTART', start)
+            .setProperty('DTEND', end)
             .setSummary(`Lab Advanced Python`)
             .setDescription(
                 `Handledare: ${people.join(', ')}\nKurskoder: ${

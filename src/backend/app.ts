@@ -8,7 +8,6 @@ import { createCalendar, findPeople, loadCsvFromUrl } from './convert'
 interface EnvironmentVariables {
     PORT?: number
     CSV_URL?: string | null
-    OFFSET_MINUTES?: string
 }
 
 // Remove 'optional' attributes from a type's properties
@@ -19,11 +18,13 @@ type Concrete<Type> = {
 const DEFAULT_ENVIRONMENT: Concrete<EnvironmentVariables> = {
     PORT: 8080,
     CSV_URL: null,
-    OFFSET_MINUTES: '0',
 }
 
-const ENVIRONMENT: Concrete<EnvironmentVariables> = Object.assign(Object.assign({}, DEFAULT_ENVIRONMENT), process.env as EnvironmentVariables)
-const { PORT, CSV_URL, OFFSET_MINUTES } = ENVIRONMENT
+const ENVIRONMENT: Concrete<EnvironmentVariables> = Object.assign(
+    Object.assign({}, DEFAULT_ENVIRONMENT),
+    process.env as EnvironmentVariables
+)
+const { PORT, CSV_URL } = ENVIRONMENT
 
 if (!CSV_URL) {
     console.error('Missing required environment CSV_URL')
@@ -43,21 +44,25 @@ if (fs.existsSync(PUBLIC_DIRECTORY)) {
 }
 
 app.get('/calendar', (req, res) => {
-    loadCsvFromUrl(CSV_URL).then(csv => {
-
-        const ta = String(req.query.ta ?? '')
-    const calendar = createCalendar(csv, ta, parseInt(OFFSET_MINUTES))
-
-    res.setHeader('Content-Type', 'text/calendar')
-        .setHeader('Content-Disposition', `attachment; filename="${ta}.ics"`)
-        .end(calendar.serialize())
-    })
+    const ta = String(req.query.ta ?? '')
+    loadCsvFromUrl(CSV_URL)
+        .then(csv => {
+            return createCalendar(csv, ta)
+        })
+        .then(calendar => {
+            res.setHeader('Content-Type', 'text/calendar')
+                .setHeader(
+                    'Content-Disposition',
+                    `attachment; filename="${ta}.ics"`
+                )
+                .end(calendar.serialize())
+        })
 })
 
 app.get('/people', (req, res) => {
     loadCsvFromUrl(CSV_URL).then(csv => {
         const people = [...findPeople(csv)].sort()
-        res.json({people: people})
+        res.json({ people: people })
     })
 })
 
